@@ -4,11 +4,32 @@ jobs:
   Compile:
     runs-on: ubuntu-latest
     steps:
+      - name: Cache Node Modules
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node_modules-cache
+
       - name: Checkout code
         uses: actions/checkout@v4  # Upgrade from v1 (deprecated) to v4
+
+      - name: Setup Node
+      - uses: action/setup-node@v2
+        with:
+          node-version: 16.x
 
       - name: Install dependencies and build
         working-directory: ./backend  # Set directory once for all commands in this step
         run: |
           npm install
           npm run build
+
+      - name: Generate Artifact
+      - run: cd backend/build && zip -r artifact.zip ./ -x '*.git*'
+
+      - name: Store Artifact
+        uses: action/upload-artifact@v2
+        with:
+          name: backend-artifact
+          path: backend/build/artifact.zip
