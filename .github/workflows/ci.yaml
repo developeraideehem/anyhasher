@@ -38,21 +38,24 @@ jobs:
           path: backend/build/artifact.zip
 
 lint:
-   needs: [build]
-   runs-on: ubuntu-latest
-   Steps:
-     - name: Checkout
-       uses: action/checkout@v4
+  needs: [build]
+  runs-on: ubuntu-latest
+  Steps:
+    - name: Checkout
+      uses: action/checkout@v4
 
-     - name: Cache Node Modole
-       id: cache
-       uses: action/cache@v3
-       with:
-          path: backend/node_modules  # Cache the backend's node_modules
-          key: node-modules-${{ hashFiles('backend/package-lock.json') }}
+    - name: Cache Node Modole
+      id: cache
+      uses: action/cache@v3
+      with:
+        path: backend/node_modules  # Cache the backend's node_modules
+        key: node-modules-${{ hashFiles('backend/package-lock.json') }}
     
-     - name: Install dependencies and Lint
-       working-directory: ./backend
-       run: |
-            npm i          # Clean install (uses package-lock.json)
-            npm run lint   # lint the project
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      working-directory: ./backend
+      run: npm i          # Clean install (uses package-lock.json)
+
+    - name: Lint the code 
+      working-directory: ./backend   
+      run: npm run lint   # lint the project
