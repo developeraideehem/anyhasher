@@ -37,7 +37,7 @@ jobs:
           name: backend-artifact
           path: backend/build/artifact.zip
 
-lint:
+ lint:
   needs: [compile]
   runs-on: ubuntu-latest
   steps:
