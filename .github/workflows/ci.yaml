@@ -37,25 +37,25 @@ jobs:
           name: backend-artifact
           path: backend/build/artifact.zip
 
- lint:
-  needs: [compile]
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+   lint:
+     needs: [compile]
+     runs-on: ubuntu-latest
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v4
 
-    - name: Cache Node Module
-      id: cache
-      uses: actions/cache@v3
-      with:
-        path: backend/node_modules  # Cache the backend's node_modules
-        key: node-modules-${{ hashFiles('backend/package-lock.json') }}
+       - name: Cache Node Module
+         id: cache
+         uses: actions/cache@v3
+         with:
+           path: backend/node_modules  # Cache the backend's node_modules
+           key: node-modules-${{ hashFiles('backend/package-lock.json') }}
     
-    - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      working-directory: ./backend
-      run: npm i          # Clean install (uses package-lock.json)
+       - name: Install dependencies
+         if: steps.cache.outputs.cache-hit != 'true'
+         working-directory: ./backend
+         run: npm ci          # Clean install (uses package-lock.json)
 
-    - name: Lint the code 
-      working-directory: ./backend   
-      run: npm run lint   # lint the project
+       - name: Lint the code 
+         working-directory: ./backend   
+         run: npm run lint   # lint the project
