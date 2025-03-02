@@ -4,32 +4,35 @@ jobs:
   Compile:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Cache Node Modules
         id: cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          path: node_modules
-          key: node_modules-cache
+          path: backend/node_modules  # Cache the backend's node_modules
+          key: node-modules-${{ hashFiles('backend/package-lock.json') }}
 
-      - name: Checkout code
-        uses: actions/checkout@v4  # Upgrade from v1 (deprecated) to v4
-
-      - name: Setup Node
-      - uses: action/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # Fixed action name (added "s")
         with:
-          node-version: 16.x
+          node-version: 20.x  # Updated to Node 20 (16.x is deprecated)
+          cache: 'npm'
 
       - name: Install dependencies and build
-        working-directory: ./backend  # Set directory once for all commands in this step
+        working-directory: ./backend
         run: |
-          npm install
-          npm run build
+          npm ci          # Clean install (uses package-lock.json)
+          npm run build   # Build the project
 
       - name: Generate Artifact
-      - run: cd backend/build && zip -r artifact.zip ./ -x '*.git*'
+        working-directory: ./backend/build
+        run: |
+          zip -r artifact.zip ./* -x '*.git*'  # Zip everything except .git files
 
-      - name: Store Artifact
-        uses: action/upload-artifact@v2
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4  # Fixed action name and version
         with:
           name: backend-artifact
           path: backend/build/artifact.zip
