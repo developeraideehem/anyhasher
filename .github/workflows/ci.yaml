@@ -59,3 +59,27 @@ jobs:
       - name: Lint the code 
         working-directory: ./backend   
         run: npm run lint
+
+  test:
+    needs: [compile]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Node Modules
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: node-modules-${{ hashFiles('backend/package-lock.json') }}    
+          # Install ONLY if cache is missed (optimized)
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        working-directory: ./backend
+        run: npm ci
+
+          # 🔥 NEW: Unit Test Step
+      - name: Run Unit Tests
+        working-directory: ./backend
+        run: npm test  # Assumes "test" script exists in package.json
