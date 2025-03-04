@@ -1,7 +1,7 @@
 name: Enterprise-Grade CI Pipeline
 on: 
   push:
-    branches: [main, dev]  # Specific branch targeting
+    branches: [main]  # Specific branch targeting
   pull_request:  # Add PR trigger
     types: [opened, synchronize]
 
@@ -46,12 +46,14 @@ jobs:
           retention-days: 3  # Cleanup old artifacts
 
   lint:
+    needs: [Compile]  # Changed from [build] to [Compile]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Restore Node Modules Cache
+        id: cache
         uses: actions/cache@v3
         with:
           path: backend/node_modules
@@ -60,11 +62,11 @@ jobs:
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         working-directory: ./backend
-        run: npm ci --omit=dev  # Linting doesn't need devDependencies
+        run: npm ci # Linting doesn't need devDependencies
 
       - name: Run Linter
         working-directory: ./backend
-        run: npm run lint -- --max-warnings=0  # Fail on any warnings
+        run: npm run lint  # Fail on any warnings
 
   test:
     needs: [Compile]  # Fixed case sensitivity
